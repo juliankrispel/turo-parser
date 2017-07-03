@@ -9,12 +9,13 @@
     "babel-preset-stage-0": "^6.24.1",
     "gaze-cli": "^0.2.0",
     "jest": "^20.0.4",
+    "lodash": "^4.17.4",
     "nearley": "^2.10.1",
     "regenerator-runtime": "^0.10.5"
   },
   "scripts": {
-    "compile": "nearleyc src/turo.ne -o dist/turo.js",
+    "compile": "nearleyc src/turo.ne -o src/parser.js",
     "test": "yarn compile && jest",
-    "test:watch": "gaze \"yarn test\" \"src/**/*.*\" \"__tests__/**/*.*\""
+    "test:watch": "gaze \"yarn test\" \"src/**/[!parser]*.*\""
   }
 }

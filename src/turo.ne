@@ -6,6 +6,18 @@
 # statement -> linebreak? _ expression _
 #  | _ expression _
 
+statements -> statement:* {%
+  function(data) {
+    return data[0];
+  }
+%}
+
+# statement
+statement -> linebreak _ expression _ {%
+  function(data, location, reject) {
+    return data[2][0];
+  }
+%}
 
 # expressions
 expression ->
