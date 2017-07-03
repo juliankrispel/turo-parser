@@ -13,27 +13,41 @@ statements -> statement:* {%
 %}
 
 # statement
-statement -> linebreak _ expression _ {%
-  function(data, location, reject) {
+statement -> linebreak _ (expression | assignment) _ {%
+  function(data) {
     return data[2][0];
   }
 %}
 
+assignment -> identifier _ "=" _ expression {%
+  function(data) {
+    return {
+      type: 'assignment',
+      identifier: data[0],
+      right: data[4],
+    };
+  }
+%}
+
 # expressions
-expression ->
+expression -> (
   multiplication
   | sum
   | power_of
   | square_root
   | parantheses
-  | number
+  | value
+) {%
+  function(data) {
+    return data[0][0];
+  }
+%}
 
 # parantheses
 parantheses -> "(" _ expression _ ")" {%
   function (data, location, reject) {
-    // simply return the expression
-    data[2][0].parens = true;
-    return data[2][0];
+    data[2].parens = true;
+    return data[2];
   }
 %}
 
@@ -42,10 +56,11 @@ linebreak -> "\n"
 # multiplication
 multiplication -> expression _ multiply _ expression {%
   function (data, location, reject) {
+    const operator = data[2][0];
     return {
-      type: 'multiplication',
+      type: operator === '/' ? 'division' : 'multiplication',
       location,
-      operator: data[2][0],
+      operator,
       left: data[0],
       right: data[4],
     };
@@ -55,10 +70,11 @@ multiplication -> expression _ multiply _ expression {%
 # sums
 sum -> expression _ plus_minus _ expression {%
   function (data, location, reject) {
+    const operator = data[2][0];
     return {
-      type: 'sum',
+      type: operator === '+' ? 'addition' : 'substraction',
       location,
-      operator: data[2][0],
+      operator,
       left: data[0],
       right: data[4],
     };
@@ -69,7 +85,7 @@ sum -> expression _ plus_minus _ expression {%
 power_of -> expression _ pow _ expression {%
   function(data, location) {
     return {
-      type: 'power_of',
+      type: 'pow',
       location,
       left: data[0],
       right: data[4],
@@ -82,7 +98,7 @@ power_of -> expression _ pow _ expression {%
 square_root -> expression _ root _ expression {%
   function(data, location) {
     return {
-      type: 'square_root',
+      type: 'sqrt',
       location,
       left: data[0],
       right: data[4],
@@ -91,16 +107,42 @@ square_root -> expression _ root _ expression {%
 %}
 
 
+value -> (
+  number
+  | identifier
+) {%
+  function(data) {
+    return {
+      type: 'value',
+      content: data[0][0]
+    };
+  }
+%}
+
 # numbers
-number -> decimal
-  | percentage 
+number -> (
+  decimal
+) {%
+  function(data, location) {
+    return {
+      type: 'number',
+      location,
+      value: data[0][0],
+    };
+  }
+%}
 
-
-# units and variables
-
+identifier -> [a-zA-Z_]:+ [a-z-A-Z0-0_]:+ {%
+  function(data) {
+    return {
+      type: 'identifier',
+      name: data[0].concat(data[1]).join(''),
+    };
+  }
+%}
 
 # literals
-pow -> "^" | "**"
+pow -> "^" | "**" | "to the power of"
 multiply -> "/" | "*"
 plus_minus -> "+" | "-"
-root -> "√"
+root -> "√" | "sqrt"
