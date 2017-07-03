@@ -82,7 +82,7 @@ describe('compiler', () => {
       it(`compiles the ${func} math function`, () => {
         const text = `${func}(3 * 12 + 3)`;
         const value = compile(text).toValues()[0];
-        expect(value).toEqual(Math[func](3 * 2 + 3));
+        expect(value).toEqual(Math[func](3 * 12 + 3));
       });
     })
   });
