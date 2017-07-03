@@ -128,6 +128,7 @@ var grammar = {
     {"name": "expression$subexpression$1", "symbols": ["square_root"]},
     {"name": "expression$subexpression$1", "symbols": ["parantheses"]},
     {"name": "expression$subexpression$1", "symbols": ["value"]},
+    {"name": "expression$subexpression$1", "symbols": ["unit_value"]},
     {"name": "expression", "symbols": ["expression$subexpression$1"], "postprocess": 
         function(data) {
           return data[0][0];
@@ -193,6 +194,16 @@ var grammar = {
           };
         }
         },
+    {"name": "unit_value$subexpression$1", "symbols": ["value", "_", "unit"]},
+    {"name": "unit_value", "symbols": ["unit_value$subexpression$1"], "postprocess": 
+        function(data) {
+          return {
+            type: 'unitvalue',
+            unit: data[3],
+            content: data[0]
+          };
+        }
+        },
     {"name": "value$subexpression$1", "symbols": ["number"]},
     {"name": "value$subexpression$1", "symbols": ["identifier"]},
     {"name": "value", "symbols": ["value$subexpression$1"], "postprocess": 
@@ -221,6 +232,18 @@ var grammar = {
         function(data) {
           return {
             type: 'identifier',
+            name: data[0].concat(data[1]).join(''),
+          };
+        }
+        },
+    {"name": "unit$ebnf$1", "symbols": [/[a-zA-Z_]/]},
+    {"name": "unit$ebnf$1", "symbols": ["unit$ebnf$1", /[a-zA-Z_]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "unit$ebnf$2", "symbols": [/[a-z-A-Z0-0_]/]},
+    {"name": "unit$ebnf$2", "symbols": ["unit$ebnf$2", /[a-z-A-Z0-0_]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "unit", "symbols": ["unit$ebnf$1", "unit$ebnf$2"], "postprocess": 
+        function(data) {
+          return {
+            type: 'unit',
             name: data[0].concat(data[1]).join(''),
           };
         }

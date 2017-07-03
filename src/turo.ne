@@ -39,6 +39,7 @@ expression -> (
   | square_root
   | parantheses
   | value
+  | unit_value
 ) {%
   function(data) {
     return data[0][0];
@@ -106,7 +107,6 @@ power_of -> expression _ pow _ expression {%
   }
 %}
 
-
 # square root
 square_root -> expression _ root _ expression {%
   function(data, location) {
@@ -115,6 +115,16 @@ square_root -> expression _ root _ expression {%
       location,
       left: data[0],
       right: data[4],
+    };
+  }
+%}
+
+unit_value -> (value _ unit) {%
+  function(data) {
+    return {
+      type: 'unitvalue',
+      unit: data[3],
+      content: data[0]
     };
   }
 %}
@@ -131,6 +141,7 @@ value -> (
     };
   }
 %}
+
 
 # numbers
 number -> (
@@ -154,6 +165,16 @@ identifier -> [a-zA-Z_]:+ [a-z-A-Z0-0_]:+ {%
     };
   }
 %}
+
+unit -> [a-zA-Z_]:+ [a-z-A-Z0-0_]:+ {%
+  function(data) {
+    return {
+      type: 'unit',
+      name: data[0].concat(data[1]).join(''),
+    };
+  }
+%}
+
 
 function_name -> "sin" | "cos" | "cosh" | "abs" | "acos" | "asin" | "asinh" | "atan" | "atanh" | "atan2" | "exp" | "expm1" | "ceil" | "floor" | "log" | "round" | "tan" | "tanh"
 
