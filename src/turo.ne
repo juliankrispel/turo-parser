@@ -29,9 +29,11 @@ assignment -> identifier _ "=" _ expression {%
   }
 %}
 
+
 # expressions
 expression -> (
   multiplication
+  | function
   | sum
   | power_of
   | square_root
@@ -40,6 +42,17 @@ expression -> (
 ) {%
   function(data) {
     return data[0][0];
+  }
+%}
+
+# functions
+function -> function_name _ "(" _ expression _ ")" {%
+  function(data) {
+    return {
+      type: 'func',
+      operator: data[0][0],
+      right: data[4],
+    };
   }
 %}
 
@@ -132,6 +145,7 @@ number -> (
   }
 %}
 
+
 identifier -> [a-zA-Z_]:+ [a-z-A-Z0-0_]:+ {%
   function(data) {
     return {
@@ -140,6 +154,8 @@ identifier -> [a-zA-Z_]:+ [a-z-A-Z0-0_]:+ {%
     };
   }
 %}
+
+function_name -> "sin" | "cos" | "cosh" | "abs" | "acos" | "asin" | "asinh" | "atan" | "atanh" | "atan2" | "exp" | "expm1" | "ceil" | "floor" | "log" | "round" | "tan" | "tanh"
 
 # literals
 pow -> "^" | "**" | "to the power of"

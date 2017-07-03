@@ -47,16 +47,43 @@ describe('compiler', () => {
         expect(values[0]).toEqual(5);
         expect(values[1]).toEqual(10);
       });
+    });
+
+    describe('reassignments', () => {
+      const text = `sum = 1 + 2
+      sum = sum + 2
+      sum = sum * 2`
 
       it('evaluates expressions in combination reassignments in sequence', () => {
-        const text = `sum = 1 + 2
-        sum = sum + 2
-        sum = sum * 2`
         const values = compile(text).toValues();
         expect(values[0]).toEqual(3);
         expect(values[1]).toEqual(5);
         expect(values[2]).toEqual(10);
       });
+
+      it('gives me undefined if the variable I\'m getting doesn\'t exist', () => {
+        const doc = compile(text);
+        expect(doc.getVariable('boom')).toBe(undefined);
+      });
+
+      it('lets you get correct variable values per line', () => {
+        const doc = compile(text);
+        expect(doc.getVariable('sum', 1)).toEqual({ lineNumber: 0, name: 'sum', value: 3 });
+        expect(doc.getVariable('sum', 2)).toEqual({ lineNumber: 1, name: 'sum', value: 5 });
+        expect(doc.getVariable('sum', 3)).toEqual({ lineNumber: 2, name: 'sum', value: 10 });
+      });
     });
+  });
+
+  describe('math functions', () => {
+    const functions = ["sin", "cos", "cosh", "abs", "acos", "asin", "asinh", "atan", "atanh", "atan2", "exp", "expm1", "ceil", "floor", "log", "round", "tan", "tanh"];
+
+    functions.forEach(func => {
+      it(`compiles the ${func} math function`, () => {
+        const text = `${func}(3 * 12 + 3)`;
+        const value = compile(text).toValues()[0];
+        expect(value).toEqual(Math[func](3 * 2 + 3));
+      });
+    })
   });
 });

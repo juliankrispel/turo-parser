@@ -5,7 +5,7 @@ import parser from './parser';
 const operate = (node, operation, ...args) => {
   node = compileNode(node, ...args);
   node.value = operation(node.left.value, node.right.value, ...args);
-  return node
+  return node;
 }
 
 const evaluateIdentifier = (node, context, lineNumber) => {
@@ -18,6 +18,12 @@ const operations = {
     (node, ...args) => operate(node, (left, right) => left + right, ...args),
   substraction:
     (node, ...args) => operate(node, (left, right) => left - right, ...args),
+  func:
+    (node, ...args) => {
+      node = compileNode(node, ...args);
+      node.value = Math[node.operator](node.right.value);
+      return node;
+    },
   sqrt:
     (node, ...args) => operate(node, (left, right) => Math.sqrt(left, right), ...args),
   multiplication:
@@ -87,9 +93,9 @@ class Context {
   }
 
   // the linNum argument lets you define the valid variable for that line
-  getVariable = (name, lineNum) => {
+  getVariable = (varName, lineNum) => {
     let vars = this.state.variables.filter(({ name }) => {
-      return name === name;
+      return name === varName;
     });
     if (lineNum) {
       vars = vars.filter(({ lineNumber }) => lineNum > lineNumber);
